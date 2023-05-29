@@ -1,0 +1,20 @@
+.info-window {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+}
+
+.info-window h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.info-window p {
+    font-size: 14px;
+    line-height: 1.4;
+}
