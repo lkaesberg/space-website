@@ -157,6 +157,10 @@ const SolarSystem = () => {
                 const distanceToPlanet = spaceship.position.distanceTo(planet.position);
                 if (distanceToPlanet <= planet.orbitRadius) {
                     setCurrentPlanetInfo(planet);
+                    const radialVector = new THREE.Vector3().subVectors(planet.position, spaceship.position).normalize();
+                    const tangentialVector = new THREE.Vector3(radialVector.y, -radialVector.x, 0); // Perpendicular to the radial vector in 2D
+                    const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / planet.orbitRadius));
+                    spaceship.velocity.set(...velocityVector)
                 }
                 if (distanceToPlanet <= planet.radius) {
                     spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 40000))
