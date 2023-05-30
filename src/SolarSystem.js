@@ -161,7 +161,7 @@ const SolarSystem = () => {
                     const tangentialVector = new THREE.Vector3(radialVector.y, -radialVector.x, 0); // Perpendicular to the radial vector in 2D
                     const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / planet.orbitRadius));
                     const targetVelocity = velocityVector.add(planet.velocity)
-                    const scaledVelocityDif = targetVelocity.sub(spaceship.velocity).multiplyScale(0.05)
+                    const scaledVelocityDif = targetVelocity.sub(spaceship.velocity).multiplyScalar(0.05)
                     spaceship.velocity.add(...scaledVelocityDif)
                 }
                 if (distanceToPlanet <= planet.radius) {
