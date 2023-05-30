@@ -44,7 +44,7 @@ const SolarSystem = () => {
                 position: new THREE.Vector3(450, 0, 0),
                 velocity: new THREE.Vector3(0, 1, 0),
                 mass: 10000,
-                orbitRadius: 300,
+                orbitRadius: 40,
                 orbitInfo: 'This is Earth. It is the third planet from the Sun.',
             },
             {
@@ -54,7 +54,7 @@ const SolarSystem = () => {
                 position: new THREE.Vector3(-1000, 0, 0),
                 velocity: new THREE.Vector3(0, -1, 0),
                 mass: 500000,
-                orbitRadius: 200,
+                orbitRadius: 60,
                 orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
             },
             // Add more planets here
