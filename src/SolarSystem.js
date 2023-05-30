@@ -8,8 +8,8 @@ const SolarSystem = () => {
     const containerRef = useRef(null);
     const spaceshipRef = useRef(null);
     const [currentPlanetInfo, setCurrentPlanetInfo] = useState(null);
-    const buttons = {w: false, a: false, s: false, d: false}
-    const cameraZ = 1000
+    const buttons = {w: false, a: false, s: false, d: false, " ": false}
+    const cameraZ = 1500
 
     useEffect(() => {
         // Set up scene
@@ -18,7 +18,7 @@ const SolarSystem = () => {
             75,
             window.innerWidth / window.innerHeight,
             0.1,
-            1000
+            2000
         );
         const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -33,7 +33,7 @@ const SolarSystem = () => {
                 color: 0xffff00,
                 position: new THREE.Vector3(0, 0, 0),
                 velocity: new THREE.Vector3(0, 0, 0),
-                mass: 100000,
+                mass: 10000000,
                 orbitRadius: 200,
                 orbitInfo: 'This is the Sun. It is the center of the solar system.',
             },
@@ -43,7 +43,7 @@ const SolarSystem = () => {
                 color: 0x0000ff,
                 position: new THREE.Vector3(450, 0, 0),
                 velocity: new THREE.Vector3(0, 1, 0),
-                mass: 1,
+                mass: 10000,
                 orbitRadius: 300,
                 orbitInfo: 'This is Earth. It is the third planet from the Sun.',
             },
@@ -51,10 +51,10 @@ const SolarSystem = () => {
                 name: 'Mars',
                 radius: 15,
                 color: 0xff0000,
-                position: new THREE.Vector3(-670, 0, 0),
+                position: new THREE.Vector3(-1000, 0, 0),
                 velocity: new THREE.Vector3(0, -1, 0),
-                mass: 5000,
-                orbitRadius: 50,
+                mass: 500000,
+                orbitRadius: 200,
                 orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
             },
             // Add more planets here
@@ -98,7 +98,7 @@ const SolarSystem = () => {
 
 
         // Set up gravitational interaction
-        const gravitationalConstant = 0.01;
+        const gravitationalConstant = 0.0001;
 
         const updatePlanets = () => {
             for (let i = 0; i < planets.length; i++) {
@@ -130,7 +130,11 @@ const SolarSystem = () => {
             }
 
             const rotationSpeed = 0.05;
-            const speed = 0.01;
+            let speed = 0.01;
+
+            if (buttons[" "]) {
+                speed = 0.03
+            }
 
             if (buttons.w) {
                 spaceship.velocity = addVelocityInForwardDirection(spaceship.rotation, spaceship.velocity, speed);
@@ -153,6 +157,9 @@ const SolarSystem = () => {
                 const distanceToPlanet = spaceship.position.distanceTo(planet.position);
                 if (distanceToPlanet <= planet.orbitRadius) {
                     setCurrentPlanetInfo(planet);
+                }
+                if (distanceToPlanet <= planet.radius) {
+                    spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 40000))
                 }
 
                 meshes[i].position.copy(planet.position);
@@ -179,8 +186,6 @@ const SolarSystem = () => {
             camera.position.set(...planets[0].position)
             camera.position.z = cameraZ
             spaceship.position.add(spaceship.velocity);
-            console.log(spaceshipRef.current.position)
-
         };
 
         const addVelocityInForwardDirection = (rotationVector, velocity, speed) => {
