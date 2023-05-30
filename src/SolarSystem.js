@@ -3,14 +3,17 @@ import * as THREE from 'three';
 import InfoWindow from "./InfoWindow";
 import "./SolarSystem.css"
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
+import {InteractionManager} from 'three.interactive';
 import {Vector3} from "three";
 
 const SolarSystem = () => {
     const containerRef = useRef(null);
     const spaceshipRef = useRef(null);
     const [currentPlanetInfo, setCurrentPlanetInfo] = useState(null);
+    let targetPlanet = null;
     const buttons = {w: false, a: false, s: false, d: false, " ": false}
     const cameraZ = 1500
+
 
     useEffect(() => {
         // Set up scene
@@ -25,6 +28,11 @@ const SolarSystem = () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         containerRef.current.appendChild(renderer.domElement);
         camera.position.z = cameraZ;
+        const interactionManager = new InteractionManager(
+            renderer,
+            camera,
+            renderer.domElement
+        );
 
         // Create solar system objects
         const planets = [
@@ -75,6 +83,11 @@ const SolarSystem = () => {
             const geometry = new THREE.SphereGeometry(planet.radius, 32, 32);
             const material = new THREE.MeshBasicMaterial({color: planet.color});
             const mesh = new THREE.Mesh(geometry, material);
+            interactionManager.add(mesh);
+            mesh.addEventListener("click", () => {
+                targetPlanet = planet;
+                console.log(planet.name)
+            });
             mesh.position.copy(planet.position);
             scene.add(mesh);
             return mesh;
@@ -91,6 +104,7 @@ const SolarSystem = () => {
         scene.add(ambientLight);
 
         const meshes = planets.map((planet) => createPlanet(planet));
+
         // Create the spaceship
         const spaceshipGeometry = new THREE.BoxGeometry(1, 2, 1);
         const spaceshipMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
@@ -197,6 +211,16 @@ const SolarSystem = () => {
                 linePositions.shift()
                 linePositions.shift()
                 linePositions.shift()
+            }
+            if (targetPlanet) {
+                const direction = targetPlanet.position.clone().sub(spaceship.position).normalize();
+                const speed = targetPlanet.velocity.length() * 1.5;
+                const newVelocity = direction.multiplyScalar(speed);
+                const scaledVelocityDif = newVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.03)
+                spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif))
+                if (spaceship.position.distanceTo(targetPlanet.position) < targetPlanet.orbitRadius) {
+                    targetPlanet = null
+                }
             }
 
             line.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePositions), 3));
