@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import InfoWindow from "./InfoWindow";
 import "./SolarSystem.css"
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
+import {Vector3} from "three";
 
 const SolarSystem = () => {
     const containerRef = useRef(null);
@@ -54,6 +55,16 @@ const SolarSystem = () => {
                 position: new THREE.Vector3(-1000, 0, 0),
                 velocity: new THREE.Vector3(0, -1, 0),
                 mass: 500000,
+                orbitRadius: 60,
+                orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
+            },
+            {
+                name: 'Neptune',
+                radius: 15,
+                color: 0x0000aa,
+                position: new THREE.Vector3(1300, 0, 0),
+                velocity: new THREE.Vector3(0, 0.4, 0),
+                mass: 200000,
                 orbitRadius: 60,
                 orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
             },
@@ -155,16 +166,19 @@ const SolarSystem = () => {
 
                 // Check if spaceship entered the orbit of the planet
                 const distanceToPlanet = spaceship.position.distanceTo(planet.position);
+
                 if (distanceToPlanet <= planet.orbitRadius) {
                     setCurrentPlanetInfo(planet);
                     const radialVector = new THREE.Vector3().subVectors(planet.position, spaceship.position).normalize();
                     const tangentialVector = new THREE.Vector3(radialVector.y, -radialVector.x, 0); // Perpendicular to the radial vector in 2D
                     const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / planet.orbitRadius));
-                    const targetVelocity = velocityVector.add(planet.velocity)
-                    const scaledVelocityDif = targetVelocity.sub(spaceship.velocity).multiplyScalar(0.05)
-                    spaceship.velocity.add(...scaledVelocityDif)
+                    const targetVelocity = velocityVector.clone().add(planet.velocity)
+                    const scaledVelocityDif = targetVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.3)
+                    console.log(scaledVelocityDif)
+                    spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif))
                 }
                 if (distanceToPlanet <= planet.radius) {
+                    console.log("Test")
                     spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 40000))
                 }
 
