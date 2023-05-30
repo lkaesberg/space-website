@@ -55,7 +55,7 @@ const SolarSystem = () => {
                 position: new THREE.Vector3(-1000, 0, 0),
                 velocity: new THREE.Vector3(0, -1, 0),
                 mass: 500000,
-                orbitRadius: 60,
+                orbitRadius: 100,
                 orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
             },
             {
@@ -172,14 +172,12 @@ const SolarSystem = () => {
                     const radialVector = new THREE.Vector3().subVectors(planet.position, spaceship.position).normalize();
                     const tangentialVector = new THREE.Vector3(radialVector.y, -radialVector.x, 0); // Perpendicular to the radial vector in 2D
                     const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / planet.orbitRadius));
-                    const targetVelocity = velocityVector.clone().add(planet.velocity)
-                    const scaledVelocityDif = targetVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.3)
-                    console.log(scaledVelocityDif)
+                    const targetVelocity = velocityVector.clone().add(planet.velocity).multiplyScalar(planet.orbitRadius / distanceToPlanet)
+                    const scaledVelocityDif = targetVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.04)
                     spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif))
                 }
                 if (distanceToPlanet <= planet.radius) {
-                    console.log("Test")
-                    spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 40000))
+                    spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 20000))
                 }
 
                 meshes[i].position.copy(planet.position);
