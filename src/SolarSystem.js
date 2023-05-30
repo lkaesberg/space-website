@@ -181,14 +181,17 @@ const SolarSystem = () => {
                 // Check if spaceship entered the orbit of the planet
                 const distanceToPlanet = spaceship.position.distanceTo(planet.position);
 
-                if (distanceToPlanet <= planet.orbitRadius) {
+                if (distanceToPlanet <= planet.orbitRadius * 2) {
                     setCurrentPlanetInfo(planet);
+                }
+                if (distanceToPlanet <= planet.orbitRadius) {
                     const radialVector = new THREE.Vector3().subVectors(planet.position, spaceship.position).normalize();
                     const tangentialVector = new THREE.Vector3(radialVector.y, -radialVector.x, 0); // Perpendicular to the radial vector in 2D
-                    const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / planet.orbitRadius));
-                    const targetVelocity = velocityVector.clone().add(planet.velocity).multiplyScalar(planet.orbitRadius / distanceToPlanet)
-                    const scaledVelocityDif = targetVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.04)
-                    spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif))
+
+                    const velocityVector = tangentialVector.multiplyScalar(Math.sqrt((gravitationalConstant * planet.mass) / distanceToPlanet));
+                    const targetVelocity = velocityVector.clone().add(planet.velocity);
+                    const scaledVelocityDif = targetVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.05);
+                    spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif));
                 }
                 if (distanceToPlanet <= planet.radius) {
                     spaceship.velocity.set(...planet.position.clone().sub(spaceship.position).normalize().negate().multiplyScalar(planet.mass / planet.radius / 20000))
@@ -214,7 +217,7 @@ const SolarSystem = () => {
             }
             if (targetPlanet) {
                 const direction = targetPlanet.position.clone().sub(spaceship.position).normalize();
-                const speed = targetPlanet.velocity.length() * 1.5;
+                const speed = 2;
                 const newVelocity = direction.multiplyScalar(speed);
                 const scaledVelocityDif = newVelocity.clone().sub(spaceship.velocity).multiplyScalar(0.03)
                 spaceship.velocity.add(new THREE.Vector3(...scaledVelocityDif))
