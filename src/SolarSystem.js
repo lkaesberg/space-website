@@ -26,10 +26,16 @@ const SolarSystem = () => {
             0.1,
             2000
         );
+        var loader = new THREE.TextureLoader();
+        var texture = loader.load('/2k_stars_milky_way.jpg');
+        scene.background = texture;
+        texture.encoding = THREE.sRGBEncoding;
+
         const usdzLoader = new USDZLoader();
         const gltfLoader = new GLTFLoader();
         const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMappingExposure = 1.5;
         containerRef.current.appendChild(renderer.domElement);
         camera.position.z = cameraZ;
         const interactionManager = new InteractionManager(
