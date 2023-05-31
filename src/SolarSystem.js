@@ -2,7 +2,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import * as THREE from 'three';
 import InfoWindow from "./InfoWindow";
 import "./SolarSystem.css"
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+import {USDZLoader} from "three/addons/loaders/USDZLoader.js";
 import {InteractionManager} from 'three.interactive';
 import {Vector3} from "three";
 
@@ -13,7 +14,8 @@ const SolarSystem = () => {
     let targetPlanet = null;
     const buttons = {w: false, a: false, s: false, d: false, " ": false}
     const cameraZ = 1500
-
+    // Set up gravitational interaction
+    const gravitationalConstant = 0.0001;
 
     useEffect(() => {
         // Set up scene
@@ -24,6 +26,8 @@ const SolarSystem = () => {
             0.1,
             2000
         );
+        const usdzLoader = new USDZLoader();
+        const gltfLoader = new GLTFLoader();
         const renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
         containerRef.current.appendChild(renderer.domElement);
@@ -44,26 +48,32 @@ const SolarSystem = () => {
                 velocity: new THREE.Vector3(0, 0, 0),
                 mass: 10000000,
                 orbitRadius: 200,
+                model: "/planets/sun.glb",
+                rotation: 0.002,
                 orbitInfo: 'This is the Sun. It is the center of the solar system.',
             },
             {
                 name: 'Earth',
                 radius: 20,
                 color: 0x0000ff,
-                position: new THREE.Vector3(450, 0, 0),
-                velocity: new THREE.Vector3(0, 1, 0),
+                position: new THREE.Vector3(300, 0, 0),
+                velocity: new THREE.Vector3(0, 0, 0),
                 mass: 10000,
                 orbitRadius: 40,
+                rotation: 0.01,
+                model: "/planets/earth.glb",
                 orbitInfo: 'This is Earth. It is the third planet from the Sun.',
             },
             {
                 name: 'Mars',
                 radius: 15,
                 color: 0xff0000,
-                position: new THREE.Vector3(-1000, 0, 0),
-                velocity: new THREE.Vector3(0, -1, 0),
+                position: new THREE.Vector3(450, 0, 0),
+                velocity: new THREE.Vector3(0, 0, 0),
                 mass: 500000,
                 orbitRadius: 100,
+                rotation: 0.01,
+                model: "/planets/mars.glb",
                 orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
             },
             {
@@ -71,10 +81,24 @@ const SolarSystem = () => {
                 radius: 15,
                 color: 0x0000aa,
                 position: new THREE.Vector3(1300, 0, 0),
-                velocity: new THREE.Vector3(0, 0.4, 0),
+                velocity: new THREE.Vector3(0, 0, 0),
                 mass: 200000,
                 orbitRadius: 60,
-                orbitInfo: 'This is Mars. It is the fourth planet from the Sun.',
+                rotation: 0.01,
+                model: "/planets/neptune.glb",
+                orbitInfo: 'This is Neptune. It is the eighth planet from the Sun.',
+            },
+            {
+                name: 'Saturn',
+                radius: 15,
+                color: 0x0000aa,
+                position: new THREE.Vector3(900, 0, 0),
+                velocity: new THREE.Vector3(0, 0, 0),
+                mass: 200000,
+                orbitRadius: 60,
+                rotation: 0.01,
+                model: "/planets/saturn.glb",
+                orbitInfo: 'This is Saturn. It is the sixth planet from the Sun.',
             },
             // Add more planets here
         ];
@@ -84,10 +108,21 @@ const SolarSystem = () => {
             const material = new THREE.MeshBasicMaterial({color: planet.color});
             const mesh = new THREE.Mesh(geometry, material);
             interactionManager.add(mesh);
+            if (planet.position.length() !== 0) {
+                planet.velocity.add(new THREE.Vector3(0, Math.sqrt((gravitationalConstant * planets[0].mass) / planet.position.length()), 0))
+            }
             mesh.addEventListener("click", () => {
                 targetPlanet = planet;
                 console.log(planet.name)
             });
+            if (planet.model) {
+                gltfLoader.load(planet.model, (gltf) => {
+                    const model = gltf.scene
+                    model.scale.set(0.1, 0.1, 0.1)
+                    model.rotation.x = Math.PI / 2
+                    mesh.add(model)
+                })
+            }
             mesh.position.copy(planet.position);
             scene.add(mesh);
             return mesh;
@@ -113,17 +148,14 @@ const SolarSystem = () => {
         spaceship.position.set(300, 0, 0)
         spaceshipRef.current = spaceship
         scene.add(spaceshipRef.current);
-        const loader = new GLTFLoader();
-        loader.load('/spaceshuttle/scene.gltf', (gltf) => {
+
+        gltfLoader.load('/spaceshuttle/scene.gltf', (gltf) => {
             const model = gltf.scene;
             model.rotation.y = -Math.PI / 2
             model.scale.set(5, 5, 5)
             spaceship.add(model)
         })
 
-
-        // Set up gravitational interaction
-        const gravitationalConstant = 0.0001;
 
         const updatePlanets = () => {
             for (let i = 0; i < planets.length; i++) {
@@ -271,7 +303,7 @@ const SolarSystem = () => {
             updatePlanets();
 
             for (let i = 0; i < meshes.length; i++) {
-                meshes[i].rotation.y += 0.01;
+                meshes[i].rotation.z += planets[i].rotation;
             }
 
             renderer.render(scene, camera);
